@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -16,7 +15,7 @@ func CalculateBusinessHourDuration(start, end time.Time, workStart, workEnd stri
 	we, err2 := time.Parse("15:04", workEnd)
 	if err1 != nil || err2 != nil {
 		// log error, fallback to full duration
-		fmt.Printf("[BusinessHour] Failed to parse work hours: %v, %v\n", err1, err2)
+		// fmt.Printf("[BusinessHour] Failed to parse work hours: %v, %v\n", err1, err2)
 		return end.Sub(start)
 	}
 	var total time.Duration
@@ -54,7 +53,7 @@ func CalculateBusinessHourDuration(start, end time.Time, workStart, workEnd stri
 			total += next.Sub(cur)
 		}
 		// Debug log (uncomment for troubleshooting)
-		fmt.Printf("[BusinessHour] cur=%v, next=%v, add=%v, total=%v\n", cur, next, next.Sub(cur), total)
+		// fmt.Printf("[BusinessHour] cur=%v, next=%v, add=%v, total=%v\n", cur, next, next.Sub(cur), total)
 		cur = next
 		if cur.Before(end) {
 			cur = time.Date(cur.Year(), cur.Month(), cur.Day()+1, ws.Hour(), ws.Minute(), 0, 0, cur.Location())
@@ -62,7 +61,7 @@ func CalculateBusinessHourDuration(start, end time.Time, workStart, workEnd stri
 	}
 	// Defensive: never return negative
 	if total < 0 {
-		fmt.Printf("[BusinessHour] Negative total detected: %v\n", total)
+		// fmt.Printf("[BusinessHour] Negative total detected: %v\n", total)
 		return 0
 	}
 	return total
