@@ -86,12 +86,12 @@ func updateSummaryMetrics(tickets []itop.Ticket) {
 
 		// Ticket age (for open/assigned tickets)
 
-		// SLA deadline from config
-		prioKey := strings.ToLower(prio)
+		// SLA deadline from iTop (not config, now cached)
+		slt, err := itop.GetSLTDeadlineCached(t.Class, t.Priority, t.Service)
 		var responseDeadline, resolveDeadline time.Duration
-		if d, ok := config.SLADeadlines[t.Class][prioKey]; ok {
-			responseDeadline, _ = parseDuration(d.Response)
-			resolveDeadline, _ = parseDuration(d.Resolve)
+		if err == nil {
+			responseDeadline = slt.TTO
+			resolveDeadline = slt.TTR
 		}
 
 		// RAW calculation
