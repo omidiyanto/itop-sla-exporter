@@ -5,6 +5,30 @@ import (
 	"time"
 )
 
+// parseDateFlexible mencoba beberapa format waktu umum
+func parseDateFlexible(s string) (time.Time, error) {
+	if s == "" {
+		return time.Time{}, nil
+	}
+	layouts := []string{
+		"2006-01-02 15:04:05",
+		time.RFC3339,
+		"2006-01-02T15:04:05Z07:00",
+		"2006-01-02 15:04:05Z07:00",
+		"2006-01-02",
+		"2006-01-02 15:04",
+	}
+	var t time.Time
+	var err error
+	for _, layout := range layouts {
+		t, err = time.Parse(layout, s)
+		if err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, err
+}
+
 type TicketResponse struct {
 	Objects map[string]struct {
 		Fields struct {
@@ -17,7 +41,7 @@ type TicketResponse struct {
 			Impact                 string `json:"impact"`
 			ServiceID              string `json:"service_id"`
 			ServiceName            string `json:"service_name"`
-			ServiceSubcategoryName string `json:"service_subcategory_name"`
+			ServiceSubcategoryName string `json:"servicesubcategory_name"`
 			AgentID                string `json:"agent_id"`
 			Agent                  string `json:"agent_id_friendlyname"`
 			TeamID                 string `json:"team_id"`
@@ -41,11 +65,11 @@ func ParseTickets(data []byte) ([]Ticket, error) {
 	var tickets []Ticket
 	for _, obj := range resp.Objects {
 		fields := obj.Fields
-		startDate, _ := time.Parse("2006-01-02 15:04:05", fields.StartDate)
-		assignmentDate, _ := time.Parse("2006-01-02 15:04:05", fields.AssignmentDate)
-		resolutionDate, _ := time.Parse("2006-01-02 15:04:05", fields.ResolutionDate)
-		ttoDeadline, _ := time.Parse("2006-01-02 15:04:05", fields.TTODeadline)
-		ttrDeadline, _ := time.Parse("2006-01-02 15:04:05", fields.TTRDeadline)
+		startDate, _ := parseDateFlexible(fields.StartDate)
+		assignmentDate, _ := parseDateFlexible(fields.AssignmentDate)
+		resolutionDate, _ := parseDateFlexible(fields.ResolutionDate)
+		ttoDeadline, _ := parseDateFlexible(fields.TTODeadline)
+		ttrDeadline, _ := parseDateFlexible(fields.TTRDeadline)
 
 		ticket := Ticket{
 			ID:                 fields.ID,
