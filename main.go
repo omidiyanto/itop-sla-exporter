@@ -92,6 +92,9 @@ func updateSummaryMetrics(tickets []itop.Ticket) {
 		if err == nil {
 			responseDeadline = slt.TTO
 			resolveDeadline = slt.TTR
+			// log.Printf("SLT fetched for class=%s, priority=%s, service=%s: TTO=%v, TTR=%v", t.Class, t.Priority, t.Service, slt.TTO, slt.TTR)
+		} else {
+			// log.Printf("SLT fetch error for class=%s, priority=%s, service=%s: %v", t.Class, t.Priority, t.Service, err)
 		}
 
 		// RAW calculation

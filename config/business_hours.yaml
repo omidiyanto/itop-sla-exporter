@@ -1,30 +1,3 @@
 work_hours:
   start: "08:00"
   end: "17:00"
-sla_deadlines:
-  Incident:
-    low:
-      response: 4h
-      resolve: 24h
-    medium:
-      response: 2h
-      resolve: 12h
-    high:
-      response: 1h
-      resolve: 8h
-    critical:
-      response: 30m
-      resolve: 4h
-  UserRequest:
-    low:
-      response: 8h
-      resolve: 48h
-    medium:
-      response: 4h
-      resolve: 24h
-    high:
-      response: 2h
-      resolve: 12h
-    critical:
-      response: 1h
-      resolve: 6h

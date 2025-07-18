@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -66,12 +67,14 @@ func GetTicketSLT(class, ref, priority, serviceName string) (SLTDeadline, error)
 	client := &http.Client{Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
 	req1, _ := http.NewRequest("POST", baseURL, bytes.NewReader(formData1))
 	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// log debug dimatikan
 	resp1, err := client.Do(req1)
 	if err != nil {
 		return SLTDeadline{}, err
 	}
 	defer resp1.Body.Close()
 	body1, _ := ioutil.ReadAll(resp1.Body)
+	// log debug dimatikan
 	var cc struct {
 		Objects map[string]struct {
 			Fields struct {
@@ -118,17 +121,19 @@ func GetTicketSLT(class, ref, priority, serviceName string) (SLTDeadline, error)
 	formData2 := encodeForm(form2)
 	req2, _ := http.NewRequest("POST", baseURL, bytes.NewReader(formData2))
 	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	// log debug dimatikan
 	resp2, err := client.Do(req2)
 	if err != nil {
 		return SLTDeadline{}, err
 	}
 	defer resp2.Body.Close()
 	body2, _ := ioutil.ReadAll(resp2.Body)
+	// log debug dimatikan
 	var sltResp struct {
 		Objects map[string]struct {
 			Fields struct {
 				Metric   string `json:"metric"`
-				Value    int    `json:"value"`
+				Value    string `json:"value"`
 				Unit     string `json:"unit"`
 				SLAsList []struct {
 					SLAName string `json:"sla_name"`
@@ -141,10 +146,16 @@ func GetTicketSLT(class, ref, priority, serviceName string) (SLTDeadline, error)
 	for _, obj := range sltResp.Objects {
 		for _, sla := range obj.Fields.SLAsList {
 			if sla.SLAName == slaName {
+				valInt := 0
+				if obj.Fields.Value != "" {
+					if v, err := strconv.Atoi(obj.Fields.Value); err == nil {
+						valInt = v
+					}
+				}
 				if obj.Fields.Metric == "tto" {
-					tto = parseSLTDuration(obj.Fields.Value, obj.Fields.Unit)
+					tto = parseSLTDuration(valInt, obj.Fields.Unit)
 				} else if obj.Fields.Metric == "ttr" {
-					ttr = parseSLTDuration(obj.Fields.Value, obj.Fields.Unit)
+					ttr = parseSLTDuration(valInt, obj.Fields.Unit)
 				}
 			}
 		}
