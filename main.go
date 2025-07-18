@@ -181,7 +181,32 @@ func setTicketDetailMetric(t itop.Ticket) {
 		ttrRaw = t.ResolutionDate.Sub(t.StartDate).Seconds()
 		ttrBH = utils.CalculateBusinessHourDuration(t.StartDate, t.ResolutionDate, workStart, workEnd, holidays).Seconds()
 	}
-	// Emit business-hour metric
+
+	// Ambil SLT deadline dari cache
+	slt, err := itop.GetSLTDeadlineCached(t.Class, t.Priority, t.Service)
+	var responseDeadline, resolveDeadline time.Duration
+	if err == nil {
+		responseDeadline = slt.TTO
+		resolveDeadline = slt.TTR
+	}
+
+	// Compliance logic
+	slaComplyRaw := "violate"
+	slaComplyBH := "violate"
+	if responseDeadline > 0 && ttoRaw > 0 && ttoRaw <= responseDeadline.Seconds() {
+		slaComplyRaw = "comply"
+	}
+	if resolveDeadline > 0 && ttrRaw > 0 && ttrRaw <= resolveDeadline.Seconds() {
+		slaComplyRaw = "comply"
+	}
+	if responseDeadline > 0 && ttoBH > 0 && ttoBH <= responseDeadline.Seconds() {
+		slaComplyBH = "comply"
+	}
+	if resolveDeadline > 0 && ttrBH > 0 && ttrBH <= resolveDeadline.Seconds() {
+		slaComplyBH = "comply"
+	}
+
+	// Emit business-hour metric (dengan label sla_compliance)
 	ticketDetailInfo.WithLabelValues(
 		t.ID,
 		t.Ref,
@@ -201,9 +226,10 @@ func setTicketDetailMetric(t itop.Ticket) {
 		fmt.Sprintf("%.0f", ttoBH),
 		fmt.Sprintf("%.0f", ttrBH),
 		"business-hour",
+		slaComplyBH,
 	).Set(1)
 
-	// Emit raw metric
+	// Emit raw metric (dengan label sla_compliance)
 	ticketDetailInfo.WithLabelValues(
 		t.ID,
 		t.Ref,
@@ -223,6 +249,7 @@ func setTicketDetailMetric(t itop.Ticket) {
 		fmt.Sprintf("%.0f", ttoRaw),
 		fmt.Sprintf("%.0f", ttrRaw),
 		"raw",
+		slaComplyRaw,
 	).Set(1)
 }
 
@@ -388,12 +415,12 @@ var (
 var ticketDetailInfo = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "itop_ticket_detail_info",
-		Help: "Detail info per ticket, with all fields and time metrics in seconds.",
+		Help: "Detail info per ticket, with all fields, time metrics in seconds, and SLA compliance.",
 	},
 	[]string{
 		"id", "ref", "class", "title", "status", "priority", "urgency", "impact",
 		"service_name", "servicesubcategory_name", "agent_id_friendlyname", "team_id_friendlyname",
 		"start_date", "assignment_date", "resolution_date",
-		"time_to_response", "time_to_resolve", "type",
+		"time_to_response", "time_to_resolve", "type", "sla_compliance",
 	},
 )
