@@ -190,23 +190,25 @@ func setTicketDetailMetric(t itop.Ticket) {
 		resolveDeadline = slt.TTR
 	}
 
-	// Compliance logic
-	slaComplyRaw := "violate"
-	slaComplyBH := "violate"
+	// Compliance logic per metric
+	slaComplyRawResp := "violate"
+	slaComplyRawRes := "violate"
+	slaComplyBHResp := "violate"
+	slaComplyBHRes := "violate"
 	if responseDeadline > 0 && ttoRaw > 0 && ttoRaw <= responseDeadline.Seconds() {
-		slaComplyRaw = "comply"
+		slaComplyRawResp = "comply"
 	}
 	if resolveDeadline > 0 && ttrRaw > 0 && ttrRaw <= resolveDeadline.Seconds() {
-		slaComplyRaw = "comply"
+		slaComplyRawRes = "comply"
 	}
 	if responseDeadline > 0 && ttoBH > 0 && ttoBH <= responseDeadline.Seconds() {
-		slaComplyBH = "comply"
+		slaComplyBHResp = "comply"
 	}
 	if resolveDeadline > 0 && ttrBH > 0 && ttrBH <= resolveDeadline.Seconds() {
-		slaComplyBH = "comply"
+		slaComplyBHRes = "comply"
 	}
 
-	// Emit business-hour metric (dengan label sla_compliance)
+	// Emit business-hour metric (response)
 	ticketDetailInfo.WithLabelValues(
 		t.ID,
 		t.Ref,
@@ -226,10 +228,35 @@ func setTicketDetailMetric(t itop.Ticket) {
 		fmt.Sprintf("%.0f", ttoBH),
 		fmt.Sprintf("%.0f", ttrBH),
 		"business-hour",
-		slaComplyBH,
+		"response",
+		slaComplyBHResp,
 	).Set(1)
 
-	// Emit raw metric (dengan label sla_compliance)
+	// Emit business-hour metric (resolve)
+	ticketDetailInfo.WithLabelValues(
+		t.ID,
+		t.Ref,
+		t.Class,
+		t.Title,
+		t.Status,
+		prio,
+		urg,
+		t.Impact,
+		t.Service,
+		t.ServiceSubcategory,
+		t.Agent,
+		t.Team,
+		startDateStr,
+		assignmentDateStr,
+		resolutionDateStr,
+		fmt.Sprintf("%.0f", ttoBH),
+		fmt.Sprintf("%.0f", ttrBH),
+		"business-hour",
+		"resolve",
+		slaComplyBHRes,
+	).Set(1)
+
+	// Emit raw metric (response)
 	ticketDetailInfo.WithLabelValues(
 		t.ID,
 		t.Ref,
@@ -249,7 +276,32 @@ func setTicketDetailMetric(t itop.Ticket) {
 		fmt.Sprintf("%.0f", ttoRaw),
 		fmt.Sprintf("%.0f", ttrRaw),
 		"raw",
-		slaComplyRaw,
+		"response",
+		slaComplyRawResp,
+	).Set(1)
+
+	// Emit raw metric (resolve)
+	ticketDetailInfo.WithLabelValues(
+		t.ID,
+		t.Ref,
+		t.Class,
+		t.Title,
+		t.Status,
+		prio,
+		urg,
+		t.Impact,
+		t.Service,
+		t.ServiceSubcategory,
+		t.Agent,
+		t.Team,
+		startDateStr,
+		assignmentDateStr,
+		resolutionDateStr,
+		fmt.Sprintf("%.0f", ttoRaw),
+		fmt.Sprintf("%.0f", ttrRaw),
+		"raw",
+		"resolve",
+		slaComplyRawRes,
 	).Set(1)
 }
 
@@ -415,12 +467,12 @@ var (
 var ticketDetailInfo = prometheus.NewGaugeVec(
 	prometheus.GaugeOpts{
 		Name: "itop_ticket_detail_info",
-		Help: "Detail info per ticket, with all fields, time metrics in seconds, and SLA compliance.",
+		Help: "Detail info per ticket, with all fields, time metrics in seconds, SLA compliance, and metric type.",
 	},
 	[]string{
 		"id", "ref", "class", "title", "status", "priority", "urgency", "impact",
 		"service_name", "servicesubcategory_name", "agent_id_friendlyname", "team_id_friendlyname",
 		"start_date", "assignment_date", "resolution_date",
-		"time_to_response", "time_to_resolve", "type", "sla_compliance",
+		"time_to_response", "time_to_resolve", "type", "sla_metric", "sla_compliance",
 	},
 )
