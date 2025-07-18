@@ -7,7 +7,6 @@ RUN go build -o main .
 
 # Runtime Stage
 FROM alpine:latest
-RUN apk add --no-cache cronie
 WORKDIR /app
 COPY --from=builder /app/main .
 RUN chmod a+x /app/main
