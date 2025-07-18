@@ -120,15 +120,13 @@ func updateSummaryMetrics(tickets []itop.Ticket) {
 		ttoBH := utils.CalculateBusinessHourDuration(t.StartDate, t.AssignmentDate, workStart, workEnd, holidays).Seconds()
 		complyResponseBH := 0.0
 		complyResolveBH := 0.0
-		if responseDeadline > 0 && ttoBH > 0 {
-			if ttoBH <= responseDeadline.Seconds() {
-				complyResponseBH = 1.0
-			}
+		// Perbaikan: jika ttoBH == 0 tapi ttoRaw <= deadline, tetap comply (response sebelum jam kerja)
+		if responseDeadline > 0 && ((ttoBH > 0 && ttoBH <= responseDeadline.Seconds()) || (ttoBH == 0 && ttoRaw > 0 && ttoRaw <= responseDeadline.Seconds())) {
+			complyResponseBH = 1.0
 		}
-		if resolveDeadline > 0 && ttrBH > 0 {
-			if ttrBH <= resolveDeadline.Seconds() {
-				complyResolveBH = 1.0
-			}
+		// Perbaikan: jika ttrBH == 0 tapi ttrRaw <= deadline, tetap comply (resolve sebelum jam kerja)
+		if resolveDeadline > 0 && ((ttrBH > 0 && ttrBH <= resolveDeadline.Seconds()) || (ttrBH == 0 && ttrRaw > 0 && ttrRaw <= resolveDeadline.Seconds())) {
+			complyResolveBH = 1.0
 		}
 		slaCompliance.WithLabelValues(t.Class, prio, urg, "business-hour", "response", "comply").Add(complyResponseBH)
 		slaCompliance.WithLabelValues(t.Class, prio, urg, "business-hour", "response", "violate").Add(1.0 - complyResponseBH)
