@@ -199,10 +199,12 @@ func setTicketDetailMetric(t itop.Ticket) {
 	if resolveDeadline > 0 && ttrRaw > 0 && ttrRaw <= resolveDeadline.Seconds() {
 		slaComplyRawRes = "comply"
 	}
-	if responseDeadline > 0 && ttoBH > 0 && ttoBH <= responseDeadline.Seconds() {
+	// Perbaikan: jika ttoBH == 0 tapi ttoRaw <= deadline, tetap comply (response sebelum jam kerja)
+	if responseDeadline > 0 && ((ttoBH > 0 && ttoBH <= responseDeadline.Seconds()) || (ttoBH == 0 && ttoRaw > 0 && ttoRaw <= responseDeadline.Seconds())) {
 		slaComplyBHResp = "comply"
 	}
-	if resolveDeadline > 0 && ttrBH > 0 && ttrBH <= resolveDeadline.Seconds() {
+	// Perbaikan: jika ttrBH == 0 tapi ttrRaw <= deadline, tetap comply (resolve sebelum jam kerja)
+	if resolveDeadline > 0 && ((ttrBH > 0 && ttrBH <= resolveDeadline.Seconds()) || (ttrBH == 0 && ttrRaw > 0 && ttrRaw <= resolveDeadline.Seconds())) {
 		slaComplyBHRes = "comply"
 	}
 
