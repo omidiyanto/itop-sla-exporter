@@ -21,6 +21,12 @@ func CalculateBusinessHourDuration(start, end time.Time, workStart, workEnd stri
 			cur = time.Date(cur.Year(), cur.Month(), cur.Day()+1, ws.Hour(), ws.Minute(), 0, 0, cur.Location())
 			continue
 		}
+		// Check weekend (Saturday=6, Sunday=0)
+		weekday := cur.Weekday()
+		if weekday == time.Saturday || weekday == time.Sunday {
+			cur = time.Date(cur.Year(), cur.Month(), cur.Day()+1, ws.Hour(), ws.Minute(), 0, 0, cur.Location())
+			continue
+		}
 		// Work hour window
 		workDayStart := time.Date(cur.Year(), cur.Month(), cur.Day(), ws.Hour(), ws.Minute(), 0, 0, cur.Location())
 		workDayEnd := time.Date(cur.Year(), cur.Month(), cur.Day(), we.Hour(), we.Minute(), 0, 0, cur.Location())

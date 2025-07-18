@@ -22,7 +22,7 @@ type Config struct {
 		Start string `yaml:"start"`
 		End   string `yaml:"end"`
 	} `yaml:"work_hours"`
-	Holidays     []string `yaml:"holidays"`
+	// Holidays removed: now loaded from holidays.txt
 	SLADeadlines map[string]map[string]struct {
 		Response string `yaml:"response"`
 		Resolve  string `yaml:"resolve"`
@@ -35,8 +35,10 @@ func updateSummaryMetrics(tickets []itop.Ticket) {
 	ticketCount.Reset()
 	slaCompliance.Reset()
 
+	// Load holidays from file (sync with iTop)
+	holidaysList, _ := itop.LoadHolidaysFromFile("holidays.txt")
 	holidays := make(map[string]struct{})
-	for _, h := range config.Holidays {
+	for _, h := range holidaysList {
 		holidays[h] = struct{}{}
 	}
 	workStart := config.WorkHours.Start
@@ -142,8 +144,9 @@ func setTicketDetailMetric(t itop.Ticket) {
 	var startDateStr, assignmentDateStr, resolutionDateStr string
 	workStart := config.WorkHours.Start
 	workEnd := config.WorkHours.End
+	holidaysList, _ := itop.LoadHolidaysFromFile("holidays.txt")
 	holidays := make(map[string]struct{})
-	for _, h := range config.Holidays {
+	for _, h := range holidaysList {
 		holidays[h] = struct{}{}
 	}
 	if t.StartDate.IsZero() {
@@ -278,6 +281,11 @@ func main() {
 			time.Sleep(10 * time.Second)
 		}
 	}()
+	// Start holiday sync goroutine in parallel
+	go itop.SyncHolidaysToFile(
+		"holidays.txt",
+		10*time.Second,
+	)
 
 	// Periodic summary metrics updater
 	go func() {

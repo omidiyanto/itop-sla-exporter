@@ -1,4 +1,11 @@
-itop_ticket_detail_info{agent_id_friendlyname="O Midiyanto",assignment_date="1752228957",time_to_resolve="746",time_to_response="537",class="Incident",id="2204",impact="1",priority="Critical",ref="I-002205",resolution_date="1752229166",service_name="GRAFANA",servicesubcategory_name="",start_date="1752228420",status="closed",team_id_friendlyname="IT DevSecOps",title="ntp.service on node uat-proxy down",urgency="High",type="bussiness-hour"} 1
-
-
-itop_ticket_detail_info{agent_id_friendlyname="O Midiyanto",assignment_date="1752228957",class="Incident",id="2204",impact="1",priority="Critical",time_to_resolve="746",time_to_response="537",ref="I-002205",resolution_date="1752229166",service_name="GRAFANA",servicesubcategory_name="",start_date="1752228420",status="closed",team_id_friendlyname="IT DevSecOps",title="ntp.service on node uat-proxy down",urgency="High",ty} 1
+curl -k -s -X POST \
+  -F 'version=1.3' \
+  -F 'auth_user=o.midiyanto' \
+  -F 'auth_pwd=Omi!2001010021' \
+  --form-string 'json_data={
+    "operation": "core/get",
+    "class": "Holiday",
+    "key": "SELECT Holiday"",
+    "output_fields": "date"
+  }' \
+  https://servicedesk.satnusa.com/webservices/rest.php | jq
