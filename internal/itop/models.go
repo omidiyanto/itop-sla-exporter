@@ -31,4 +31,6 @@ type Ticket struct {
 	AgentID            string
 	TeamID             string
 	TicketType         string // for future multi-class
+	Caller             string // caller_id_friendlyname
+	Origin             string // origin
 }

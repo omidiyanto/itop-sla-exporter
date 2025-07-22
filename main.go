@@ -17,6 +17,8 @@ import (
 	"itop-sla-exporter/internal/utils"
 )
 
+// Konversi impact 1-3 ke string
+
 type Config struct {
 	WorkHours struct {
 		Start string `yaml:"start"`
@@ -27,6 +29,19 @@ type Config struct {
 		Response string `yaml:"response"`
 		Resolve  string `yaml:"resolve"`
 	} `yaml:"sla_deadlines"`
+}
+
+func impactLabel(id string) string {
+	switch id {
+	case "1":
+		return "A department"
+	case "2":
+		return "A service"
+	case "3":
+		return "A person"
+	default:
+		return id
+	}
 }
 
 // Fungsi summary metrics updater
@@ -217,11 +232,13 @@ func setTicketDetailMetric(t itop.Ticket) {
 		t.Status,
 		prio,
 		urg,
-		t.Impact,
+		impactLabel(t.Impact),
 		t.Service,
 		t.ServiceSubcategory,
 		t.Agent,
 		t.Team,
+		t.Caller, // caller_id_friendlyname
+		t.Origin, // origin
 		startDateStr,
 		assignmentDateStr,
 		resolutionDateStr,
@@ -241,11 +258,13 @@ func setTicketDetailMetric(t itop.Ticket) {
 		t.Status,
 		prio,
 		urg,
-		t.Impact,
+		impactLabel(t.Impact),
 		t.Service,
 		t.ServiceSubcategory,
 		t.Agent,
 		t.Team,
+		t.Caller, // caller_id_friendlyname
+		t.Origin, // origin
 		startDateStr,
 		assignmentDateStr,
 		resolutionDateStr,
@@ -265,11 +284,13 @@ func setTicketDetailMetric(t itop.Ticket) {
 		t.Status,
 		prio,
 		urg,
-		t.Impact,
+		impactLabel(t.Impact),
 		t.Service,
 		t.ServiceSubcategory,
 		t.Agent,
 		t.Team,
+		t.Caller, // caller_id_friendlyname
+		t.Origin, // origin
 		startDateStr,
 		assignmentDateStr,
 		resolutionDateStr,
@@ -289,11 +310,13 @@ func setTicketDetailMetric(t itop.Ticket) {
 		t.Status,
 		prio,
 		urg,
-		t.Impact,
+		impactLabel(t.Impact),
 		t.Service,
 		t.ServiceSubcategory,
 		t.Agent,
 		t.Team,
+		t.Caller, // caller_id_friendlyname
+		t.Origin, // origin
 		startDateStr,
 		assignmentDateStr,
 		resolutionDateStr,
@@ -471,7 +494,7 @@ var ticketDetailInfo = prometheus.NewGaugeVec(
 	},
 	[]string{
 		"id", "ref", "class", "title", "status", "priority", "urgency", "impact",
-		"service_name", "servicesubcategory_name", "agent_id_friendlyname", "team_id_friendlyname",
+		"service_name", "servicesubcategory_name", "agent_id_friendlyname", "team_id_friendlyname", "caller_id_friendlyname", "origin",
 		"start_date", "assignment_date", "resolution_date",
 		"time_to_response", "time_to_resolve", "type", "sla_metric", "sla_compliance",
 	},

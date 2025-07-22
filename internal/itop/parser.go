@@ -46,6 +46,8 @@ type TicketResponse struct {
 			Agent                  string `json:"agent_id_friendlyname"`
 			TeamID                 string `json:"team_id"`
 			Team                   string `json:"team_id_friendlyname"`
+			Caller                 string `json:"caller_id_friendlyname"`
+			Origin                 string `json:"origin"`
 			StartDate              string `json:"start_date"`
 			AssignmentDate         string `json:"assignment_date"`
 			ResolutionDate         string `json:"resolution_date"`
@@ -94,6 +96,8 @@ func ParseTickets(data []byte) ([]Ticket, error) {
 			Urgency:            fields.Urgency,
 			Impact:             fields.Impact,
 			ServiceID:          fields.ServiceID,
+			Caller:             fields.Caller,
+			Origin:             fields.Origin,
 		}
 		// Calculate TTO/TTR
 		if !assignmentDate.IsZero() && !startDate.IsZero() {

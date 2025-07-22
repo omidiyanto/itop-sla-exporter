@@ -23,7 +23,7 @@ func FetchTicketsByClass(class string) ([]Ticket, error) {
 	params := map[string]interface{}{
 		"class":         class,
 		"key":           "SELECT " + class,
-		"output_fields": "id,ref,title,status,priority,urgency,impact,service_id,service_name,servicesubcategory_name,agent_id,agent_id_friendlyname,team_id,team_id_friendlyname,start_date,assignment_date,resolution_date,sla_tto_passed,sla_ttr_passed",
+		"output_fields": "id,ref,title,origin,status,priority,urgency,impact,service_id,service_name,servicesubcategory_name,agent_id,agent_id_friendlyname,team_id,team_id_friendlyname,caller_id_friendlyname,start_date,assignment_date,resolution_date,sla_tto_passed,sla_ttr_passed",
 	}
 	resp, err := client.Post("core/get", params)
 	if err != nil {
@@ -58,7 +58,7 @@ func FetchTickets() ([]Ticket, error) {
 		params := map[string]interface{}{
 			"class":         class,
 			"key":           "SELECT " + class,
-			"output_fields": "id,ref,title,status,priority,urgency,impact,service_id,service_name,servicesubcategory_name,agent_id,agent_id_friendlyname,team_id,team_id_friendlyname,start_date,assignment_date,resolution_date,sla_tto_passed,sla_ttr_passed",
+			"output_fields": "id,ref,title,origin,status,priority,urgency,impact,service_id,service_name,servicesubcategory_name,agent_id,agent_id_friendlyname,team_id,team_id_friendlyname,caller_id_friendlyname,start_date,assignment_date,resolution_date,sla_tto_passed,sla_ttr_passed",
 		}
 		resp, err := client.Post("core/get", params)
 		if err != nil {
